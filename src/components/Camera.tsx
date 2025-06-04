@@ -12,11 +12,13 @@ interface CameraProps {
 export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: CameraProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedPhotos, setCapturedPhotos] = useState<CapturedPhoto[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [cameraError, setCameraError] = useState<string>("");
+  const [characterImg, setCharacterImg] = useState<HTMLImageElement | null>(null);
 
   // 카메라 초기화
   useEffect(() => {
@@ -74,9 +76,60 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
     };
   }, []);
 
-  // 사진 촬영 함수
+  // 캐릭터 이미지 로드
+  useEffect(() => {
+    const loadCharacterImg = () => {
+      const img = new Image();
+      img.onload = () => {
+        setCharacterImg(img);
+      };
+      img.onerror = () => {
+        console.warn("캐릭터 이미지 로드 실패");
+      };
+      img.src = selectedCharacter.overlayImages[0];
+    };
+
+    loadCharacterImg();
+  }, [selectedCharacter]);
+
+  // 실시간 캐릭터 오버레이 그리기
+  const drawCharacterOverlay = () => {
+    if (!videoRef.current || !overlayCanvasRef.current || !characterImg) return;
+
+    const video = videoRef.current;
+    const canvas = overlayCanvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // 캔버스 크기를 비디오와 동일하게 설정
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+
+    // 캔버스 클리어
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 캐릭터 크기와 위치 설정 (우하단에 크게)
+    const characterSize = Math.min(canvas.width, canvas.height) * 0.4; // 화면의 40% 크기
+    const characterX = canvas.width - characterSize - 20; // 우측에서 20px 떨어진 위치
+    const characterY = canvas.height - characterSize - 20; // 하단에서 20px 떨어진 위치
+
+    // 캐릭터 그리기 (약간 투명하게)
+    ctx.globalAlpha = 0.9;
+    ctx.drawImage(characterImg, characterX, characterY, characterSize, characterSize);
+    ctx.globalAlpha = 1.0;
+  };
+
+  // 실시간 오버레이 애니메이션
+  useEffect(() => {
+    if (!characterImg) return;
+
+    const interval = setInterval(drawCharacterOverlay, 100); // 10fps로 업데이트
+    return () => clearInterval(interval);
+  }, [characterImg]);
+
+  // 사진 촬영 함수 (캐릭터와 합성)
   const capturePhoto = async () => {
-    if (!videoRef.current || !canvasRef.current) return;
+    if (!videoRef.current || !canvasRef.current || !characterImg) return;
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -88,8 +141,37 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    // 비디오 프레임을 캔버스에 그리기
+    // 1. 비디오 프레임을 캔버스에 그리기
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // 2. 캐릭터 오버레이 그리기 (실시간 미리보기와 동일한 위치/크기)
+    const characterSize = Math.min(canvas.width, canvas.height) * 0.4;
+    const characterX = canvas.width - characterSize - 20;
+    const characterY = canvas.height - characterSize - 20;
+
+    // 캐릭터 컷별로 다른 위치에 배치
+    const photoIndex = capturedPhotos.length;
+    let finalCharacterX = characterX;
+    let finalCharacterY = characterY;
+    let finalCharacterSize = characterSize;
+
+    switch (photoIndex) {
+      case 0: // 첫 번째 컷 - 우하단
+        break;
+      case 1: // 두 번째 컷 - 좌하단
+        finalCharacterX = 20;
+        break;
+      case 2: // 세 번째 컷 - 우상단
+        finalCharacterY = 20;
+        break;
+      case 3: // 네 번째 컷 - 중앙 상단 (작게)
+        finalCharacterX = (canvas.width - characterSize) / 2;
+        finalCharacterY = 20;
+        finalCharacterSize = characterSize * 0.8;
+        break;
+    }
+
+    ctx.drawImage(characterImg, finalCharacterX, finalCharacterY, finalCharacterSize, finalCharacterSize);
 
     // 캔버스를 Data URL로 변환
     const dataUrl = canvas.toDataURL("image/png");
@@ -205,24 +287,45 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 카메라 뷰 */}
           <div className="lg:col-span-2">
-            <div className="relative bg-black rounded-lg overflow-hidden">
-              <video ref={videoRef} autoPlay playsInline muted className="w-full h-auto max-h-96 object-cover" />
+            {/* 카메라 영역 */}
+            <div className="relative bg-black rounded-2xl overflow-hidden shadow-2xl">
+              {/* 비디오 스트림 */}
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-auto"
+                style={{ transform: "scaleX(-1)" }} // 거울 효과
+              />
 
-              {/* 카운트다운 오버레이 */}
-              {countdown && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                  <div className="text-6xl font-bold text-white animate-pulse">{countdown}</div>
-                </div>
-              )}
+              {/* 실시간 캐릭터 오버레이 */}
+              <canvas
+                ref={overlayCanvasRef}
+                className="absolute top-0 left-0 w-full h-full pointer-events-none"
+                style={{ transform: "scaleX(-1)" }} // 거울 효과
+              />
 
-              {/* 캐릭터 미리보기 (우측 하단) */}
-              <div className="absolute bottom-4 right-4 opacity-30">
-                <div className="text-4xl">
-                  {selectedCharacter.id === "char-1" && "🐱"}
-                  {selectedCharacter.id === "char-2" && "🐶"}
-                  {selectedCharacter.id === "char-3" && "🐰"}
+              {/* 촬영 가이드 오버레이 */}
+              <div className="absolute inset-0 pointer-events-none">
+                {/* 캐릭터 위치 안내 */}
+                <div className="absolute text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+                  {capturedPhotos.length === 0 && "📍 우하단에 캐릭터가 나타납니다"}
+                  {capturedPhotos.length === 1 && "📍 좌하단에 캐릭터가 나타납니다"}
+                  {capturedPhotos.length === 2 && "📍 우상단에 캐릭터가 나타납니다"}
+                  {capturedPhotos.length === 3 && "📍 중앙 상단에 캐릭터가 나타납니다"}
                 </div>
+
+                {/* 카운트다운 */}
+                {countdown && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-6xl font-bold text-white drop-shadow-lg animate-pulse">{countdown}</div>
+                  </div>
+                )}
               </div>
+
+              {/* 숨겨진 캔버스 (촬영용) */}
+              <canvas ref={canvasRef} className="hidden" />
             </div>
 
             {/* 촬영 버튼 */}
@@ -305,9 +408,6 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
             )}
           </div>
         </div>
-
-        {/* 숨겨진 캔버스 (촬영용) */}
-        <canvas ref={canvasRef} className="hidden" />
       </div>
     </div>
   );
