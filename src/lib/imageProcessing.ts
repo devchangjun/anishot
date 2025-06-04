@@ -206,36 +206,32 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
         await new Promise<void>((resolveImg) => {
           const img = new Image();
           img.onload = () => {
-            // 사진을 프레임에 맞춰 크기 조정
+            // 사진을 프레임에 맞춰 크기 조정 (전체 사진이 보이도록)
             const imgAspect = img.width / img.height;
             const frameAspect = photoWidth / photoHeight;
 
             let drawWidth, drawHeight, drawX, drawY;
 
             if (imgAspect > frameAspect) {
-              // 이미지가 더 넓은 경우 - 높이 맞춤
-              drawHeight = photoHeight;
-              drawWidth = photoHeight * imgAspect;
-              drawX = photoX + (photoWidth - drawWidth) / 2;
-              drawY = photoY;
-            } else {
-              // 이미지가 더 높은 경우 - 너비 맞춤
+              // 이미지가 더 넓은 경우 - 너비에 맞춰서 전체가 보이도록
               drawWidth = photoWidth;
               drawHeight = photoWidth / imgAspect;
               drawX = photoX;
               drawY = photoY + (photoHeight - drawHeight) / 2;
+            } else {
+              // 이미지가 더 높은 경우 - 높이에 맞춰서 전체가 보이도록
+              drawHeight = photoHeight;
+              drawWidth = photoHeight * imgAspect;
+              drawX = photoX + (photoWidth - drawWidth) / 2;
+              drawY = photoY;
             }
 
-            // 사진 영역 클리핑
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(photoX, photoY, photoWidth, photoHeight);
-            ctx.clip();
+            // 배경 채우기 (빈 공간을 흰색으로)
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(photoX, photoY, photoWidth, photoHeight);
 
-            // 사진 그리기
+            // 사진 그리기 (클리핑 없이 전체 표시)
             ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-
-            ctx.restore();
 
             // 사진 번호 표시 (작은 원형 배지)
             ctx.fillStyle = "#BA68C8";

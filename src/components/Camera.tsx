@@ -78,9 +78,12 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
     };
   }, []);
 
-  // 캐릭터 이미지 로드
+  // 캐릭터 이미지 로드 (촬영 횟수에 따라 다른 이미지)
   useEffect(() => {
     const loadCharacterImg = () => {
+      const currentCutIndex = capturedPhotos.length; // 0, 1, 2, 3
+      const overlayImageUrl = selectedCharacter.overlayImages[currentCutIndex] || selectedCharacter.overlayImages[0];
+
       const img = new Image();
       img.onload = () => {
         setCharacterImg(img);
@@ -88,11 +91,11 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
       img.onerror = () => {
         console.warn("캐릭터 이미지 로드 실패");
       };
-      img.src = selectedCharacter.overlayImages[0];
+      img.src = overlayImageUrl;
     };
 
     loadCharacterImg();
-  }, [selectedCharacter]);
+  }, [selectedCharacter, capturedPhotos.length]); // capturedPhotos.length 의존성 추가
 
   // 실시간 캐릭터 오버레이 그리기
   const drawCharacterOverlay = () => {
@@ -173,13 +176,29 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
       processedImg.src = processedDataUrl;
     });
 
-    // 2. 캐릭터 오버레이 그리기 (실시간 미리보기와 동일한 위치/크기)
+    // 2. 캐릭터 오버레이 그리기 (현재 컷에 맞는 이미지 사용)
+    const currentCutIndex = capturedPhotos.length; // 0, 1, 2, 3
+    const overlayImageUrl = selectedCharacter.overlayImages[currentCutIndex] || selectedCharacter.overlayImages[0];
+
+    // 현재 컷용 캐릭터 이미지 로드
+    const currentCharacterImg = new Image();
+    await new Promise<void>((resolve) => {
+      currentCharacterImg.onload = () => resolve();
+      currentCharacterImg.onerror = () => {
+        console.warn("현재 컷 캐릭터 이미지 로드 실패");
+        resolve();
+      };
+      currentCharacterImg.src = overlayImageUrl;
+    });
+
     const characterSize = Math.min(canvas.width, canvas.height) * 0.6; // 화면의 60% 크기
     const characterX = 0; // 왼쪽 끝에 딱 붙음
     const characterY = canvas.height - characterSize; // 바닥에 딱 붙음
 
-    // 모든 컷에서 동일한 위치에 캐릭터 배치
-    ctx.drawImage(characterImg, characterX, characterY, characterSize, characterSize);
+    // 현재 컷에 맞는 캐릭터 이미지로 합성
+    if (currentCharacterImg.complete && currentCharacterImg.naturalWidth > 0) {
+      ctx.drawImage(currentCharacterImg, characterX, characterY, characterSize, characterSize);
+    }
 
     // 캔버스를 Data URL로 변환
     const dataUrl = canvas.toDataURL("image/png");
@@ -320,7 +339,7 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
               <div className="absolute inset-0 pointer-events-none">
                 {/* 캐릭터 위치 안내 */}
                 <div className="absolute top-2 left-2 text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
-                  📍 왼쪽에 {selectedCharacter.name}이(가) 함께 찍혀요
+                  📍 {capturedPhotos.length + 1}번째 컷 - 왼쪽에 {selectedCharacter.name}이(가) 함께 찍혀요
                 </div>
 
                 {/* 카운트다운 */}
