@@ -108,13 +108,13 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
     // 캔버스 클리어
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 캐릭터 크기와 위치 설정 (우하단에 크게)
-    const characterSize = Math.min(canvas.width, canvas.height) * 0.4; // 화면의 40% 크기
-    const characterX = canvas.width - characterSize - 20; // 우측에서 20px 떨어진 위치
-    const characterY = canvas.height - characterSize - 20; // 하단에서 20px 떨어진 위치
+    // 캐릭터 크기와 위치 설정 (왼쪽에 크게)
+    const characterSize = Math.min(canvas.width, canvas.height) * 0.6; // 화면의 60% 크기
+    const characterX = 30; // 왼쪽에서 30px (고정)
+    const characterY = (canvas.height - characterSize) / 2; // 세로 중앙
 
     // 캐릭터 그리기 (약간 투명하게)
-    ctx.globalAlpha = 0.9;
+    ctx.globalAlpha = 0.8;
     ctx.drawImage(characterImg, characterX, characterY, characterSize, characterSize);
     ctx.globalAlpha = 1.0;
   };
@@ -145,33 +145,12 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // 2. 캐릭터 오버레이 그리기 (실시간 미리보기와 동일한 위치/크기)
-    const characterSize = Math.min(canvas.width, canvas.height) * 0.4;
-    const characterX = canvas.width - characterSize - 20;
-    const characterY = canvas.height - characterSize - 20;
+    const characterSize = Math.min(canvas.width, canvas.height) * 0.6; // 화면의 60% 크기
+    const characterX = 30; // 왼쪽에서 30px (고정)
+    const characterY = (canvas.height - characterSize) / 2; // 세로 중앙
 
-    // 캐릭터 컷별로 다른 위치에 배치
-    const photoIndex = capturedPhotos.length;
-    let finalCharacterX = characterX;
-    let finalCharacterY = characterY;
-    let finalCharacterSize = characterSize;
-
-    switch (photoIndex) {
-      case 0: // 첫 번째 컷 - 우하단
-        break;
-      case 1: // 두 번째 컷 - 좌하단
-        finalCharacterX = 20;
-        break;
-      case 2: // 세 번째 컷 - 우상단
-        finalCharacterY = 20;
-        break;
-      case 3: // 네 번째 컷 - 중앙 상단 (작게)
-        finalCharacterX = (canvas.width - characterSize) / 2;
-        finalCharacterY = 20;
-        finalCharacterSize = characterSize * 0.8;
-        break;
-    }
-
-    ctx.drawImage(characterImg, finalCharacterX, finalCharacterY, finalCharacterSize, finalCharacterSize);
+    // 모든 컷에서 동일한 위치에 캐릭터 배치
+    ctx.drawImage(characterImg, characterX, characterY, characterSize, characterSize);
 
     // 캔버스를 Data URL로 변환
     const dataUrl = canvas.toDataURL("image/png");
@@ -309,11 +288,8 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
               {/* 촬영 가이드 오버레이 */}
               <div className="absolute inset-0 pointer-events-none">
                 {/* 캐릭터 위치 안내 */}
-                <div className="absolute text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
-                  {capturedPhotos.length === 0 && "📍 우하단에 캐릭터가 나타납니다"}
-                  {capturedPhotos.length === 1 && "📍 좌하단에 캐릭터가 나타납니다"}
-                  {capturedPhotos.length === 2 && "📍 우상단에 캐릭터가 나타납니다"}
-                  {capturedPhotos.length === 3 && "📍 중앙 상단에 캐릭터가 나타납니다"}
+                <div className="absolute top-2 left-2 text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+                  📍 왼쪽에 {selectedCharacter.name}이(가) 함께 찍혀요
                 </div>
 
                 {/* 카운트다운 */}

@@ -147,7 +147,7 @@ export const addCharacterOverlay = async (
   });
 };
 
-// 4컷 레이아웃 생성 (심플한 세로 연결 스타일)
+// 4컷 레이아웃 생성 (2x2 형태)
 export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -155,19 +155,19 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
         throw new Error("4장의 사진이 필요합니다");
       }
 
-      // 캔버스 설정 (세로형 인생네컷)
+      // 캔버스 설정 (2x2 형태)
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       if (!ctx) throw new Error("Canvas context not available");
 
-      // 캔버스 크기 설정 (세로형)
-      const photoWidth = 400;
-      const photoHeight = 300;
+      // 캔버스 크기 설정 (2x2 형태)
+      const photoWidth = 300;
+      const photoHeight = 225; // 4:3 비율
       const frameThickness = 20;
-      const photoSpacing = 5;
+      const photoSpacing = 8;
 
-      canvas.width = photoWidth + frameThickness * 2;
-      canvas.height = photoHeight * 4 + photoSpacing * 3 + frameThickness * 2;
+      canvas.width = photoWidth * 2 + photoSpacing + frameThickness * 2;
+      canvas.height = photoHeight * 2 + photoSpacing + frameThickness * 2;
 
       // 그라데이션 프레임 배경
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -187,11 +187,20 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
         canvas.height - frameThickness * 2
       );
 
-      // 각 사진 배치
+      // 2x2 그리드로 사진 배치
+      const positions = [
+        { row: 0, col: 0 }, // 좌상단
+        { row: 0, col: 1 }, // 우상단
+        { row: 1, col: 0 }, // 좌하단
+        { row: 1, col: 1 }, // 우하단
+      ];
+
       for (let i = 0; i < 4; i++) {
         const photo = photos[i];
-        const photoY = frameThickness + i * (photoHeight + photoSpacing);
-        const photoX = frameThickness;
+        const pos = positions[i];
+
+        const photoX = frameThickness + pos.col * (photoWidth + photoSpacing);
+        const photoY = frameThickness + pos.row * (photoHeight + photoSpacing);
 
         // 사진 그리기
         await new Promise<void>((resolveImg) => {
@@ -227,6 +236,18 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
             ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
             ctx.restore();
+
+            // 사진 번호 표시 (작은 원형 배지)
+            ctx.fillStyle = "#BA68C8";
+            ctx.beginPath();
+            ctx.arc(photoX + 15, photoY + 15, 12, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#FFFFFF";
+            ctx.font = "bold 14px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(`${i + 1}`, photoX + 15, photoY + 20);
+
             resolveImg();
           };
 
@@ -237,17 +258,6 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
 
           img.src = photo.dataUrl;
         });
-
-        // 사진 간 구분선 (마지막 사진 제외)
-        if (i < 3) {
-          const lineY = photoY + photoHeight + photoSpacing / 2;
-          ctx.strokeStyle = "#E0E0E0";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(frameThickness + 10, lineY);
-          ctx.lineTo(canvas.width - frameThickness - 10, lineY);
-          ctx.stroke();
-        }
       }
 
       // 프레임 장식 효과
@@ -289,6 +299,14 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
       drawHeart(canvas.width - heartSize - 5, 5, heartSize); // 우상단
       drawHeart(5, canvas.height - heartSize - 5, heartSize); // 좌하단
       drawHeart(canvas.width - heartSize - 5, canvas.height - heartSize - 5, heartSize); // 우하단
+
+      // 중앙에 작은 로고/브랜딩
+      ctx.fillStyle = "#BA68C8";
+      ctx.font = "bold 12px Arial";
+      ctx.textAlign = "center";
+      ctx.globalAlpha = 0.6;
+      ctx.fillText("AniShot", canvas.width / 2, canvas.height / 2 + 4);
+      ctx.globalAlpha = 1;
 
       resolve(canvas.toDataURL("image/png"));
     } catch (error) {
