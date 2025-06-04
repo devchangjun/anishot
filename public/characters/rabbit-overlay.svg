@@ -1,0 +1,52 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 토끼 몸체 -->
+  <ellipse cx="100" cy="130" rx="45" ry="55" fill="#E1BEE7" stroke="#BA68C8" stroke-width="2"/>
+  
+  <!-- 토끼 머리 -->
+  <circle cx="100" cy="80" r="35" fill="#E1BEE7" stroke="#BA68C8" stroke-width="2"/>
+  
+  <!-- 토끼 귀 (길고 직립) -->
+  <ellipse cx="85" cy="45" rx="8" ry="30" fill="#E1BEE7" stroke="#BA68C8" stroke-width="2"/>
+  <ellipse cx="115" cy="45" rx="8" ry="30" fill="#E1BEE7" stroke="#BA68C8" stroke-width="2"/>
+  
+  <!-- 귀 안쪽 -->
+  <ellipse cx="85" cy="45" rx="4" ry="20" fill="#FFD93D"/>
+  <ellipse cx="115" cy="45" rx="4" ry="20" fill="#FFD93D"/>
+  
+  <!-- 눈 -->
+  <circle cx="88" cy="75" r="4" fill="#333"/>
+  <circle cx="112" cy="75" r="4" fill="#333"/>
+  
+  <!-- 눈 하이라이트 -->
+  <circle cx="89" cy="73" r="1.5" fill="#FFF"/>
+  <circle cx="113" cy="73" r="1.5" fill="#FFF"/>
+  
+  <!-- 코 (Y자 모양) -->
+  <path d="M 100 85 L 95 90 M 100 85 L 105 90 M 100 85 L 100 92" stroke="#333" stroke-width="2" fill="none"/>
+  
+  <!-- 입 -->
+  <path d="M 95 92 Q 100 98 105 92" stroke="#333" stroke-width="2" fill="none"/>
+  
+  <!-- 앞니 -->
+  <rect x="97" y="90" width="2" height="6" fill="#FFF" stroke="#333" stroke-width="0.5"/>
+  <rect x="101" y="90" width="2" height="6" fill="#FFF" stroke="#333" stroke-width="0.5"/>
+  
+  <!-- 꼬리 (솜털 같은) -->
+  <circle cx="140" cy="140" r="12" fill="#E1BEE7" stroke="#BA68C8" stroke-width="2"/>
+  
+  <!-- 팔 -->
+  <ellipse cx="70" cy="115" rx="12" ry="25" fill="#E1BEE7" stroke="#BA68C8" stroke-width="2"/>
+  <ellipse cx="130" cy="115" rx="12" ry="25" fill="#E1BEE7" stroke="#BA68C8" stroke-width="2"/>
+  
+  <!-- 다리 (뒷다리가 큼) -->
+  <ellipse cx="85" cy="170" rx="12" ry="22" fill="#E1BEE7" stroke="#BA68C8" stroke-width="2"/>
+  <ellipse cx="115" cy="170" rx="12" ry="22" fill="#E1BEE7" stroke="#BA68C8" stroke-width="2"/>
+  
+  <!-- 발 (큰 뒷발) -->
+  <ellipse cx="85" cy="185" rx="15" ry="10" fill="#BA68C8"/>
+  <ellipse cx="115" cy="185" rx="15" ry="10" fill="#BA68C8"/>
+  
+  <!-- 당근 액세서리 -->
+  <ellipse cx="130" cy="90" rx="3" ry="12" fill="#FF6B35" transform="rotate(15 130 90)"/>
+  <path d="M 128 82 L 132 82 L 130 78" fill="#4CAF50"/>
+</svg> 

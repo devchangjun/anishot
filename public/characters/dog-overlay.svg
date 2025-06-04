@@ -1,0 +1,52 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 강아지 몸체 -->
+  <ellipse cx="100" cy="130" rx="45" ry="55" fill="#FFD93D" stroke="#FFA726" stroke-width="2"/>
+  
+  <!-- 강아지 머리 -->
+  <circle cx="100" cy="80" r="35" fill="#FFD93D" stroke="#FFA726" stroke-width="2"/>
+  
+  <!-- 강아지 귀 (늘어짐) -->
+  <ellipse cx="75" cy="70" rx="15" ry="25" fill="#FF9B9B" stroke="#FF6B6B" stroke-width="2" transform="rotate(-30 75 70)"/>
+  <ellipse cx="125" cy="70" rx="15" ry="25" fill="#FF9B9B" stroke="#FF6B6B" stroke-width="2" transform="rotate(30 125 70)"/>
+  
+  <!-- 눈 -->
+  <circle cx="88" cy="75" r="5" fill="#333"/>
+  <circle cx="112" cy="75" r="5" fill="#333"/>
+  
+  <!-- 눈 하이라이트 -->
+  <circle cx="89" cy="73" r="2" fill="#FFF"/>
+  <circle cx="113" cy="73" r="2" fill="#FFF"/>
+  
+  <!-- 코 -->
+  <circle cx="100" cy="85" r="4" fill="#333"/>
+  
+  <!-- 입 -->
+  <path d="M 100 92 Q 90 100 85 95" stroke="#333" stroke-width="2" fill="none"/>
+  <path d="M 100 92 Q 110 100 115 95" stroke="#333" stroke-width="2" fill="none"/>
+  
+  <!-- 혀 -->
+  <ellipse cx="100" cy="98" rx="8" ry="4" fill="#FF6B6B"/>
+  
+  <!-- 꼬리 (흔들리는 모양) -->
+  <path d="M 140 140 Q 160 130 165 115 Q 170 100 160 90 Q 150 85 155 75" stroke="#FFA726" stroke-width="8" fill="none" stroke-linecap="round"/>
+  
+  <!-- 팔 -->
+  <ellipse cx="70" cy="115" rx="12" ry="25" fill="#FFD93D" stroke="#FFA726" stroke-width="2"/>
+  <ellipse cx="130" cy="115" rx="12" ry="25" fill="#FFD93D" stroke="#FFA726" stroke-width="2"/>
+  
+  <!-- 다리 -->
+  <ellipse cx="85" cy="170" rx="10" ry="20" fill="#FFD93D" stroke="#FFA726" stroke-width="2"/>
+  <ellipse cx="115" cy="170" rx="10" ry="20" fill="#FFD93D" stroke="#FFA726" stroke-width="2"/>
+  
+  <!-- 발 -->
+  <ellipse cx="85" cy="185" rx="12" ry="8" fill="#FFA726"/>
+  <ellipse cx="115" cy="185" rx="12" ry="8" fill="#FFA726"/>
+  
+  <!-- 발가락 -->
+  <circle cx="80" cy="183" r="2" fill="#FF6B6B"/>
+  <circle cx="85" cy="183" r="2" fill="#FF6B6B"/>
+  <circle cx="90" cy="183" r="2" fill="#FF6B6B"/>
+  <circle cx="110" cy="183" r="2" fill="#FF6B6B"/>
+  <circle cx="115" cy="183" r="2" fill="#FF6B6B"/>
+  <circle cx="120" cy="183" r="2" fill="#FF6B6B"/>
+</svg> 

@@ -1,0 +1,51 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 고양이 몸체 -->
+  <ellipse cx="100" cy="130" rx="45" ry="55" fill="#FF9B9B" stroke="#FF6B6B" stroke-width="2"/>
+  
+  <!-- 고양이 머리 -->
+  <circle cx="100" cy="80" r="35" fill="#FF9B9B" stroke="#FF6B6B" stroke-width="2"/>
+  
+  <!-- 고양이 귀 -->
+  <polygon points="75,55 85,35 95,55" fill="#FF9B9B" stroke="#FF6B6B" stroke-width="2"/>
+  <polygon points="105,55 115,35 125,55" fill="#FF9B9B" stroke="#FF6B6B" stroke-width="2"/>
+  
+  <!-- 귀 안쪽 -->
+  <polygon points="78,52 85,40 92,52" fill="#FFD93D"/>
+  <polygon points="108,52 115,40 122,52" fill="#FFD93D"/>
+  
+  <!-- 눈 -->
+  <circle cx="88" cy="75" r="4" fill="#333"/>
+  <circle cx="112" cy="75" r="4" fill="#333"/>
+  
+  <!-- 눈 하이라이트 -->
+  <circle cx="89" cy="73" r="1.5" fill="#FFF"/>
+  <circle cx="113" cy="73" r="1.5" fill="#FFF"/>
+  
+  <!-- 코 -->
+  <polygon points="100,85 95,90 105,90" fill="#FF6B6B"/>
+  
+  <!-- 입 -->
+  <path d="M 100 92 Q 95 98 90 95" stroke="#333" stroke-width="2" fill="none"/>
+  <path d="M 100 92 Q 105 98 110 95" stroke="#333" stroke-width="2" fill="none"/>
+  
+  <!-- 수염 -->
+  <line x1="70" y1="80" x2="55" y2="78" stroke="#333" stroke-width="1.5"/>
+  <line x1="70" y1="85" x2="55" y2="85" stroke="#333" stroke-width="1.5"/>
+  <line x1="130" y1="80" x2="145" y2="78" stroke="#333" stroke-width="1.5"/>
+  <line x1="130" y1="85" x2="145" y2="85" stroke="#333" stroke-width="1.5"/>
+  
+  <!-- 꼬리 -->
+  <path d="M 140 140 Q 165 120 170 100 Q 175 85 165 75" stroke="#FF6B6B" stroke-width="8" fill="none" stroke-linecap="round"/>
+  
+  <!-- 팔 -->
+  <ellipse cx="70" cy="115" rx="12" ry="25" fill="#FF9B9B" stroke="#FF6B6B" stroke-width="2"/>
+  <ellipse cx="130" cy="115" rx="12" ry="25" fill="#FF9B9B" stroke="#FF6B6B" stroke-width="2"/>
+  
+  <!-- 다리 -->
+  <ellipse cx="85" cy="170" rx="10" ry="20" fill="#FF9B9B" stroke="#FF6B6B" stroke-width="2"/>
+  <ellipse cx="115" cy="170" rx="10" ry="20" fill="#FF9B9B" stroke="#FF6B6B" stroke-width="2"/>
+  
+  <!-- 발 -->
+  <ellipse cx="85" cy="185" rx="12" ry="8" fill="#FF6B6B"/>
+  <ellipse cx="115" cy="185" rx="12" ry="8" fill="#FF6B6B"/>
+</svg> 

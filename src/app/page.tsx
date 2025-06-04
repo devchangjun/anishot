@@ -81,12 +81,8 @@ export default function HomePage() {
                 `}
               >
                 <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                  {/* 임시 캐릭터 아이콘 (실제 이미지로 교체 예정) */}
-                  <div className="text-6xl">
-                    {character.id === "char-1" && "🐱"}
-                    {character.id === "char-2" && "🐶"}
-                    {character.id === "char-3" && "🐰"}
-                  </div>
+                  {/* 실제 캐릭터 이미지 */}
+                  <img src={character.thumbnailUrl} alt={character.name} className="w-24 h-24 object-contain" />
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">

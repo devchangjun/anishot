@@ -147,7 +147,7 @@ export const addCharacterOverlay = async (
   });
 };
 
-// 4컷 레이아웃 생성
+// 4컷 레이아웃 생성 (연예인 프레임 스타일)
 export const create4CutLayout = async (photos: CapturedPhoto[], character: Character): Promise<string> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -155,91 +155,176 @@ export const create4CutLayout = async (photos: CapturedPhoto[], character: Chara
         throw new Error("4장의 사진이 필요합니다");
       }
 
-      // 4컷 캔버스 설정 (세로형 인생네컷)
+      // 포토부스 스타일 캔버스 설정
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       if (!ctx) throw new Error("Canvas context not available");
 
-      const cutWidth = 400;
-      const cutHeight = 300;
-      const padding = 20;
-      const headerHeight = 60;
+      // 캔버스 크기 (가로형 포토부스 스타일)
+      canvas.width = 800;
+      canvas.height = 1200;
 
-      canvas.width = cutWidth + padding * 2;
-      canvas.height = cutHeight * 4 + padding * 5 + headerHeight;
-
-      // 배경색 (흰색)
-      ctx.fillStyle = "#ffffff";
+      // 배경 그라데이션
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, "#FFE0F7");
+      gradient.addColorStop(0.5, "#E1BEE7");
+      gradient.addColorStop(1, "#FFE0F7");
+      ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 헤더 (제목)
-      ctx.fillStyle = "#333333";
-      ctx.font = "bold 24px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(`${character.name}과 함께한 추억`, canvas.width / 2, 35);
+      // 타이틀 영역
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.fillRect(50, 30, 700, 80);
+      ctx.strokeStyle = "#BA68C8";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(50, 30, 700, 80);
 
-      // 각 사진 처리 및 배치
+      // 타이틀 텍스트
+      ctx.fillStyle = "#333333";
+      ctx.font = "bold 32px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(`${character.name}과 함께한 추억`, canvas.width / 2, 80);
+
+      // 4컷 사진 영역 설정
+      const photoWidth = 280;
+      const photoHeight = 210;
+      const startY = 140;
+      const spacing = 20;
+
+      // 캐릭터 크기 및 위치 설정
+      const characterSize = 180;
+      const characterX = 520; // 우측에 위치
+
       for (let i = 0; i < 4; i++) {
         const photo = photos[i];
-        const y = headerHeight + padding + i * (cutHeight + padding);
+        const photoY = startY + i * (photoHeight + spacing);
+        const photoX = 50;
 
-        // 배경 제거 (첫 번째 사진에만 적용 - 성능상)
+        // 각 컷의 배경 (흰색 프레임)
+        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.fillRect(photoX - 10, photoY - 10, photoWidth + characterSize + 40, photoHeight + 20);
+
+        // 프레임 테두리
+        ctx.strokeStyle = "#BA68C8";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(photoX - 10, photoY - 10, photoWidth + characterSize + 40, photoHeight + 20);
+
+        // 배경 제거된 사진 처리 (첫 번째 사진만)
         let processedPhotoUrl = photo.dataUrl;
         if (i === 0) {
-          processedPhotoUrl = await removeBackground(photo.dataUrl);
+          try {
+            processedPhotoUrl = await removeBackground(photo.dataUrl);
+          } catch (error) {
+            console.warn("배경 제거 실패, 원본 사용:", error);
+            processedPhotoUrl = photo.dataUrl;
+          }
         }
 
-        // 캐릭터 오버레이 추가
-        const characterOverlay = character.overlayImages[i] || character.overlayImages[0];
-        const finalPhotoUrl = await addCharacterOverlay(
-          processedPhotoUrl,
-          characterOverlay,
-          { x: 0.8, y: 0.8 }, // 우하단
-          0.25 // 25% 크기
-        );
-
-        // 이미지 로드 및 그리기
+        // 사진 그리기
         await new Promise<void>((resolveImg) => {
           const img = new Image();
           img.onload = () => {
-            // 비율 맞춰서 그리기
+            // 사진 영역에 맞춰 크기 조정
             const imgAspect = img.width / img.height;
-            const cutAspect = cutWidth / cutHeight;
+            const photoAspect = photoWidth / photoHeight;
 
             let drawWidth, drawHeight, drawX, drawY;
 
-            if (imgAspect > cutAspect) {
-              // 이미지가 더 넓음 - 높이에 맞춤
-              drawHeight = cutHeight;
-              drawWidth = cutHeight * imgAspect;
-              drawX = padding + (cutWidth - drawWidth) / 2;
-              drawY = y;
+            if (imgAspect > photoAspect) {
+              drawHeight = photoHeight;
+              drawWidth = photoHeight * imgAspect;
+              drawX = photoX + (photoWidth - drawWidth) / 2;
+              drawY = photoY;
             } else {
-              // 이미지가 더 높음 - 너비에 맞춤
-              drawWidth = cutWidth;
-              drawHeight = cutWidth / imgAspect;
-              drawX = padding;
-              drawY = y + (cutHeight - drawHeight) / 2;
+              drawWidth = photoWidth;
+              drawHeight = photoWidth / imgAspect;
+              drawX = photoX;
+              drawY = photoY + (photoHeight - drawHeight) / 2;
             }
 
+            // 사진 클리핑 (프레임 안에만 표시)
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(photoX, photoY, photoWidth, photoHeight);
+            ctx.clip();
             ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-
-            // 테두리
-            ctx.strokeStyle = "#e0e0e0";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(padding, y, cutWidth, cutHeight);
+            ctx.restore();
 
             resolveImg();
           };
-          img.src = finalPhotoUrl;
+          img.src = processedPhotoUrl;
         });
+
+        // 캐릭터 그리기 (각 컷마다 다른 위치/크기)
+        const characterY = photoY + (photoHeight - characterSize) / 2;
+        const characterOverlay = character.overlayImages[i] || character.overlayImages[0];
+
+        await new Promise<void>((resolveChar) => {
+          const charImg = new Image();
+          charImg.onload = () => {
+            // 캐릭터마다 다른 효과 적용
+            ctx.save();
+
+            // 컷별로 다른 스타일 적용
+            switch (i) {
+              case 0: // 첫 번째 컷 - 기본
+                ctx.drawImage(charImg, characterX, characterY, characterSize, characterSize);
+                break;
+              case 1: // 두 번째 컷 - 약간 기울어짐
+                ctx.translate(characterX + characterSize / 2, characterY + characterSize / 2);
+                ctx.rotate(-0.1);
+                ctx.drawImage(charImg, -characterSize / 2, -characterSize / 2, characterSize, characterSize);
+                break;
+              case 2: // 세 번째 컷 - 확대
+                const bigSize = characterSize * 1.2;
+                ctx.drawImage(charImg, characterX - 20, characterY - 20, bigSize, bigSize);
+                break;
+              case 3: // 네 번째 컷 - 반투명
+                ctx.globalAlpha = 0.8;
+                ctx.drawImage(charImg, characterX, characterY, characterSize, characterSize);
+                break;
+            }
+
+            ctx.restore();
+            resolveChar();
+          };
+          charImg.onerror = () => {
+            console.warn("캐릭터 이미지 로드 실패");
+            resolveChar();
+          };
+          charImg.src = characterOverlay;
+        });
+
+        // 컷 번호 표시
+        ctx.fillStyle = "#BA68C8";
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText(`${i + 1}`, photoX + 10, photoY + 30);
       }
 
-      // 하단 로고/브랜딩
-      ctx.fillStyle = "#999999";
-      ctx.font = "14px Arial";
+      // 하단 브랜딩
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.fillRect(50, canvas.height - 80, 700, 50);
+      ctx.strokeStyle = "#BA68C8";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(50, canvas.height - 80, 700, 50);
+
+      ctx.fillStyle = "#BA68C8";
+      ctx.font = "bold 24px Arial";
       ctx.textAlign = "center";
-      ctx.fillText("AniShot - 나만의 인생네컷", canvas.width / 2, canvas.height - 10);
+      ctx.fillText("🎭 AniShot - 나만의 인생네컷", canvas.width / 2, canvas.height - 45);
+
+      // 장식 요소 추가
+      for (let i = 0; i < 10; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = Math.random() * 15 + 5;
+
+        ctx.fillStyle = `rgba(186, 104, 200, ${Math.random() * 0.3 + 0.1})`;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       resolve(canvas.toDataURL("image/png"));
     } catch (error) {
