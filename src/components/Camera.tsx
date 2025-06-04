@@ -108,10 +108,10 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
     // 캔버스 클리어
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 캐릭터 크기와 위치 설정 (왼쪽에 크게)
+    // 캐릭터 크기와 위치 설정 (왼쪽 끝, 바닥에 딱 붙음)
     const characterSize = Math.min(canvas.width, canvas.height) * 0.6; // 화면의 60% 크기
-    const characterX = 30; // 왼쪽에서 30px (고정)
-    const characterY = (canvas.height - characterSize) / 2; // 세로 중앙
+    const characterX = 0; // 왼쪽 끝에 딱 붙음
+    const characterY = canvas.height - characterSize; // 바닥에 딱 붙음
 
     // 캐릭터 그리기 (약간 투명하게)
     ctx.globalAlpha = 0.8;
@@ -146,8 +146,8 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
 
     // 2. 캐릭터 오버레이 그리기 (실시간 미리보기와 동일한 위치/크기)
     const characterSize = Math.min(canvas.width, canvas.height) * 0.6; // 화면의 60% 크기
-    const characterX = 30; // 왼쪽에서 30px (고정)
-    const characterY = (canvas.height - characterSize) / 2; // 세로 중앙
+    const characterX = 0; // 왼쪽 끝에 딱 붙음
+    const characterY = canvas.height - characterSize; // 바닥에 딱 붙음
 
     // 모든 컷에서 동일한 위치에 캐릭터 배치
     ctx.drawImage(characterImg, characterX, characterY, characterSize, characterSize);

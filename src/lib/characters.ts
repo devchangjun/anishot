@@ -6,7 +6,7 @@ export const SAMPLE_CHARACTERS: Character[] = [
     id: "char-1",
     name: "리바이",
     thumbnailUrl: "/characters/levi.png",
-    overlayImages: ["/characters/levi.png", "/characters/levi.png", "/characters/levi.png", "/characters/levi.png"],
+    overlayImages: ["/characters/levi.png", "/characters/levi2.png", "/characters/levi3.png", "/characters/levi2.png"],
   },
   {
     id: "char-2",
