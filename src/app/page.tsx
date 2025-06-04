@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SAMPLE_CHARACTERS } from "@/lib/characters";
 import { Character, CapturedPhoto } from "@/types";
+import { create4CutLayout } from "@/lib/imageProcessing";
 import Camera from "@/components/Camera";
 import Preview from "@/components/Preview";
 
@@ -10,6 +11,8 @@ export default function HomePage() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [currentStep, setCurrentStep] = useState<"home" | "camera" | "preview">("home");
   const [capturedPhotos, setCapturedPhotos] = useState<CapturedPhoto[]>([]);
+  const [finalImageDataUrl, setFinalImageDataUrl] = useState<string>("");
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
   const handleStartClick = () => {
     if (selectedCharacter) {
@@ -26,12 +29,44 @@ export default function HomePage() {
     setCurrentStep("home");
     setSelectedCharacter(null);
     setCapturedPhotos([]);
+    setFinalImageDataUrl("");
   };
 
   const handleBackToCamera = () => {
     setCurrentStep("camera");
     setCapturedPhotos([]);
+    setFinalImageDataUrl("");
   };
+
+  const handleDownload = () => {
+    // 다운로드 완료 후 홈으로 이동
+    console.log("이미지 다운로드 완료");
+  };
+
+  // 4컷 이미지 생성
+  useEffect(() => {
+    const generate4Cut = async () => {
+      if (currentStep === "preview" && capturedPhotos.length === 4 && !finalImageDataUrl) {
+        try {
+          setIsGenerating(true);
+          console.log("4컷 이미지 생성 시작...");
+
+          const finalImage = await create4CutLayout(capturedPhotos);
+          setFinalImageDataUrl(finalImage);
+
+          console.log("4컷 이미지 생성 완료");
+        } catch (error) {
+          console.error("4컷 생성 실패:", error);
+          // 에러 발생 시 카메라로 돌아가기
+          handleBackToCamera();
+        } finally {
+          setIsGenerating(false);
+        }
+      }
+    };
+
+    generate4Cut();
+  }, [currentStep, capturedPhotos, finalImageDataUrl]);
 
   // 카메라 단계
   if (currentStep === "camera" && selectedCharacter) {
@@ -42,12 +77,25 @@ export default function HomePage() {
 
   // 미리보기 단계
   if (currentStep === "preview" && selectedCharacter && capturedPhotos.length === 4) {
+    // 이미지 생성 중일 때 로딩 화면
+    if (isGenerating || !finalImageDataUrl) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-indigo-900 text-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
+            <h2 className="text-2xl font-bold mb-2">🎨 인생네컷 생성 중...</h2>
+            <p className="text-purple-200">잠시만 기다려주세요</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <Preview
-        photos={capturedPhotos}
-        character={selectedCharacter}
-        onBack={handleBackToCamera}
-        onHome={handleBackToHome}
+        finalImageDataUrl={finalImageDataUrl}
+        selectedCharacter={selectedCharacter}
+        onReset={handleBackToCamera}
+        onDownload={handleDownload}
       />
     );
   }
