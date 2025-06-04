@@ -14,30 +14,30 @@ interface PreviewProps {
 
 export default function Preview({ photos, character, onBack, onHome }: PreviewProps) {
   const [finalImageUrl, setFinalImageUrl] = useState<string>("");
-  const [isProcessing, setIsProcessing] = useState(true);
+  const [isGenerating, setIsGenerating] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  // 4컷 레이아웃 생성
+  // 4컷 이미지 생성
   useEffect(() => {
-    const generateFinalImage = async () => {
+    const generate4Cut = async () => {
       try {
-        setIsProcessing(true);
-        setError("");
-
+        setIsGenerating(true);
         console.log("4컷 이미지 생성 시작...");
-        const imageUrl = await create4CutLayout(photos, character);
-        setFinalImageUrl(imageUrl);
+
+        const finalImage = await create4CutLayout(photos);
+        setFinalImageUrl(finalImage);
+
         console.log("4컷 이미지 생성 완료");
-      } catch (err) {
-        console.error("4컷 생성 실패:", err);
-        setError("이미지 생성에 실패했습니다. 다시 시도해주세요.");
+      } catch (error) {
+        console.error("4컷 생성 실패:", error);
+        setError("이미지 생성 중 오류가 발생했습니다.");
       } finally {
-        setIsProcessing(false);
+        setIsGenerating(false);
       }
     };
 
-    generateFinalImage();
-  }, [photos, character]);
+    generate4Cut();
+  }, [photos]);
 
   // 이미지 다운로드
   const handleDownload = () => {
@@ -96,7 +96,7 @@ export default function Preview({ photos, character, onBack, onHome }: PreviewPr
             {/* 4컷 미리보기 */}
             <div className="flex justify-center">
               <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md">
-                {isProcessing ? (
+                {isGenerating ? (
                   <div className="aspect-[3/4] bg-gray-200 rounded-lg flex flex-col items-center justify-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
                     <p className="text-gray-600">이미지 생성 중...</p>
@@ -157,17 +157,17 @@ export default function Preview({ photos, character, onBack, onHome }: PreviewPr
               <div className="space-y-3">
                 <button
                   onClick={handleDownload}
-                  disabled={isProcessing}
+                  disabled={isGenerating}
                   className={`
                     w-full py-4 text-lg font-semibold rounded-xl transition-all duration-300
                     ${
-                      isProcessing
+                      isGenerating
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-purple-600 text-white hover:bg-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105"
                     }
                   `}
                 >
-                  {isProcessing ? "생성 중..." : "💾 이미지 저장하기"}
+                  {isGenerating ? "생성 중..." : "💾 이미지 저장하기"}
                 </button>
 
                 <div className="grid grid-cols-2 gap-3">

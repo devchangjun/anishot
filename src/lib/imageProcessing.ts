@@ -1,5 +1,5 @@
 import * as bodyPix from "@tensorflow-models/body-pix";
-import { CapturedPhoto, Character } from "@/types";
+import { CapturedPhoto } from "@/types";
 
 // BodyPix 모델 (전역으로 한 번만 로드)
 let bodyPixModel: bodyPix.BodyPix | null = null;
@@ -147,152 +147,148 @@ export const addCharacterOverlay = async (
   });
 };
 
-// 4컷 레이아웃 생성 (포토부스 스타일 - 이미 합성된 사진들 배치)
-export const create4CutLayout = async (photos: CapturedPhoto[], character: Character): Promise<string> => {
+// 4컷 레이아웃 생성 (심플한 세로 연결 스타일)
+export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string> => {
   return new Promise(async (resolve, reject) => {
     try {
       if (photos.length !== 4) {
         throw new Error("4장의 사진이 필요합니다");
       }
 
-      // 포토부스 스타일 캔버스 설정
+      // 캔버스 설정 (세로형 인생네컷)
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       if (!ctx) throw new Error("Canvas context not available");
 
-      // 캔버스 크기 (세로형 포토부스 스타일)
-      canvas.width = 600;
-      canvas.height = 800;
+      // 캔버스 크기 설정 (세로형)
+      const photoWidth = 400;
+      const photoHeight = 300;
+      const frameThickness = 20;
+      const photoSpacing = 5;
 
-      // 배경 그라데이션
-      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      canvas.width = photoWidth + frameThickness * 2;
+      canvas.height = photoHeight * 4 + photoSpacing * 3 + frameThickness * 2;
+
+      // 그라데이션 프레임 배경
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
       gradient.addColorStop(0, "#FFE0F7");
-      gradient.addColorStop(0.5, "#E1BEE7");
-      gradient.addColorStop(1, "#FFE0F7");
+      gradient.addColorStop(0.3, "#E1BEE7");
+      gradient.addColorStop(0.7, "#BA68C8");
+      gradient.addColorStop(1, "#9C27B0");
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 타이틀 영역
-      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-      ctx.fillRect(20, 20, canvas.width - 40, 60);
-      ctx.strokeStyle = "#BA68C8";
-      ctx.lineWidth = 3;
-      ctx.strokeRect(20, 20, canvas.width - 40, 60);
+      // 내부 흰색 배경
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(
+        frameThickness,
+        frameThickness,
+        canvas.width - frameThickness * 2,
+        canvas.height - frameThickness * 2
+      );
 
-      // 타이틀 텍스트
-      ctx.fillStyle = "#333333";
-      ctx.font = "bold 24px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(`${character.name}과 함께한 추억`, canvas.width / 2, 55);
-
-      // 4컷 사진 영역 설정
-      const photoWidth = 520;
-      const photoHeight = 140;
-      const startY = 100;
-      const spacing = 20;
-
+      // 각 사진 배치
       for (let i = 0; i < 4; i++) {
         const photo = photos[i];
-        const photoY = startY + i * (photoHeight + spacing);
-        const photoX = (canvas.width - photoWidth) / 2;
+        const photoY = frameThickness + i * (photoHeight + photoSpacing);
+        const photoX = frameThickness;
 
-        // 프레임 배경 (흰색)
-        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-        ctx.fillRect(photoX - 10, photoY - 10, photoWidth + 20, photoHeight + 20);
-
-        // 프레임 테두리
-        ctx.strokeStyle = "#BA68C8";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(photoX - 10, photoY - 10, photoWidth + 20, photoHeight + 20);
-
-        // 이미 합성된 사진 그리기
+        // 사진 그리기
         await new Promise<void>((resolveImg) => {
           const img = new Image();
           img.onload = () => {
-            // 사진 영역에 맞춰 크기 조정 (가로 중심)
+            // 사진을 프레임에 맞춰 크기 조정
             const imgAspect = img.width / img.height;
-            const photoAspect = photoWidth / photoHeight;
+            const frameAspect = photoWidth / photoHeight;
 
             let drawWidth, drawHeight, drawX, drawY;
 
-            if (imgAspect > photoAspect) {
-              drawWidth = photoWidth;
-              drawHeight = photoWidth / imgAspect;
-              drawX = photoX;
-              drawY = photoY + (photoHeight - drawHeight) / 2;
-            } else {
+            if (imgAspect > frameAspect) {
+              // 이미지가 더 넓은 경우 - 높이 맞춤
               drawHeight = photoHeight;
               drawWidth = photoHeight * imgAspect;
               drawX = photoX + (photoWidth - drawWidth) / 2;
               drawY = photoY;
+            } else {
+              // 이미지가 더 높은 경우 - 너비 맞춤
+              drawWidth = photoWidth;
+              drawHeight = photoWidth / imgAspect;
+              drawX = photoX;
+              drawY = photoY + (photoHeight - drawHeight) / 2;
             }
 
-            // 사진 클리핑 (프레임 안에만 표시)
+            // 사진 영역 클리핑
             ctx.save();
             ctx.beginPath();
             ctx.rect(photoX, photoY, photoWidth, photoHeight);
             ctx.clip();
-            ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-            ctx.restore();
 
+            // 사진 그리기
+            ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+            ctx.restore();
             resolveImg();
           };
+
           img.onerror = () => {
-            console.warn("사진 로드 실패");
+            console.warn(`사진 ${i + 1} 로드 실패`);
             resolveImg();
           };
+
           img.src = photo.dataUrl;
         });
 
-        // 컷 번호 표시
-        ctx.fillStyle = "#BA68C8";
-        ctx.font = "bold 18px Arial";
-        ctx.textAlign = "left";
-        ctx.fillText(`${i + 1}`, photoX + 10, photoY + 25);
-      }
-
-      // 하단 브랜딩
-      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-      ctx.fillRect(20, canvas.height - 60, canvas.width - 40, 40);
-      ctx.strokeStyle = "#BA68C8";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(20, canvas.height - 60, canvas.width - 40, 40);
-
-      ctx.fillStyle = "#BA68C8";
-      ctx.font = "bold 20px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("🎭 AniShot - 나만의 인생네컷", canvas.width / 2, canvas.height - 35);
-
-      // 장식 요소 추가 (작은 하트와 별)
-      for (let i = 0; i < 15; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        const size = Math.random() * 8 + 3;
-
-        ctx.fillStyle = `rgba(186, 104, 200, ${Math.random() * 0.3 + 0.1})`;
-        ctx.beginPath();
-
-        // 별 모양 그리기
-        const spikes = 5;
-        const outerRadius = size;
-        const innerRadius = size * 0.5;
-
-        ctx.beginPath();
-        for (let j = 0; j < spikes * 2; j++) {
-          const radius = j % 2 === 0 ? outerRadius : innerRadius;
-          const angle = (j * Math.PI) / spikes;
-          const starX = x + Math.cos(angle) * radius;
-          const starY = y + Math.sin(angle) * radius;
-
-          if (j === 0) {
-            ctx.moveTo(starX, starY);
-          } else {
-            ctx.lineTo(starX, starY);
-          }
+        // 사진 간 구분선 (마지막 사진 제외)
+        if (i < 3) {
+          const lineY = photoY + photoHeight + photoSpacing / 2;
+          ctx.strokeStyle = "#E0E0E0";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(frameThickness + 10, lineY);
+          ctx.lineTo(canvas.width - frameThickness - 10, lineY);
+          ctx.stroke();
         }
-        ctx.closePath();
-        ctx.fill();
       }
+
+      // 프레임 장식 효과
+      ctx.strokeStyle = "#FFFFFF";
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.7;
+      ctx.strokeRect(
+        frameThickness / 2,
+        frameThickness / 2,
+        canvas.width - frameThickness,
+        canvas.height - frameThickness
+      );
+      ctx.globalAlpha = 1;
+
+      // 모서리 장식 (작은 하트)
+      const drawHeart = (x: number, y: number, size: number) => {
+        ctx.fillStyle = "#FFE0F7";
+        ctx.globalAlpha = 0.8;
+
+        // 하트 모양 그리기
+        ctx.beginPath();
+        ctx.moveTo(x, y + size / 4);
+        ctx.quadraticCurveTo(x, y, x + size / 4, y);
+        ctx.quadraticCurveTo(x + size / 2, y, x + size / 2, y + size / 4);
+        ctx.quadraticCurveTo(x + size / 2, y, x + (size * 3) / 4, y);
+        ctx.quadraticCurveTo(x + size, y, x + size, y + size / 4);
+        ctx.quadraticCurveTo(x + size, y + size / 2, x + (size * 3) / 4, y + (size * 3) / 4);
+        ctx.lineTo(x + size / 2, y + size);
+        ctx.lineTo(x + size / 4, y + (size * 3) / 4);
+        ctx.quadraticCurveTo(x, y + size / 2, x, y + size / 4);
+        ctx.fill();
+
+        ctx.globalAlpha = 1;
+      };
+
+      // 네 모서리에 하트 장식
+      const heartSize = 12;
+      drawHeart(5, 5, heartSize); // 좌상단
+      drawHeart(canvas.width - heartSize - 5, 5, heartSize); // 우상단
+      drawHeart(5, canvas.height - heartSize - 5, heartSize); // 좌하단
+      drawHeart(canvas.width - heartSize - 5, canvas.height - heartSize - 5, heartSize); // 우하단
 
       resolve(canvas.toDataURL("image/png"));
     } catch (error) {

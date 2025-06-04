@@ -4,14 +4,9 @@ import { Character } from "@/types";
 export const SAMPLE_CHARACTERS: Character[] = [
   {
     id: "char-1",
-    name: "귀여운 고양이",
-    thumbnailUrl: "/characters/cat-overlay.svg",
-    overlayImages: [
-      "/characters/cat-overlay.svg",
-      "/characters/cat-overlay.svg",
-      "/characters/cat-overlay.svg",
-      "/characters/cat-overlay.svg",
-    ],
+    name: "리바이",
+    thumbnailUrl: "/characters/levi.png",
+    overlayImages: ["/characters/levi.png", "/characters/levi.png", "/characters/levi.png", "/characters/levi.png"],
   },
   {
     id: "char-2",
