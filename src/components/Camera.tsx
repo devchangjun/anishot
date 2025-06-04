@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { Character, CapturedPhoto } from "@/types";
+import { removeBackground } from "@/lib/imageProcessing";
 
 interface CameraProps {
   selectedCharacter: Character;
@@ -16,6 +17,7 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedPhotos, setCapturedPhotos] = useState<CapturedPhoto[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [cameraError, setCameraError] = useState<string>("");
   const [characterImg, setCharacterImg] = useState<HTMLImageElement | null>(null);
@@ -131,11 +133,16 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
   const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current || !characterImg) return;
 
+    setIsProcessing(true);
+
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    if (!ctx) return;
+    if (!ctx) {
+      setIsProcessing(false);
+      return;
+    }
 
     // 캔버스 크기를 비디오 크기로 설정
     canvas.width = video.videoWidth;
@@ -143,6 +150,28 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
 
     // 1. 비디오 프레임을 캔버스에 그리기
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // 1.5. 배경을 흰색으로 제거
+    const originalDataUrl = canvas.toDataURL("image/png");
+    let processedDataUrl;
+
+    try {
+      processedDataUrl = await removeBackground(originalDataUrl);
+    } catch (error) {
+      console.warn("배경 제거 실패, 원본 사용:", error);
+      processedDataUrl = originalDataUrl;
+    }
+
+    // 처리된 이미지를 다시 캔버스에 그리기
+    const processedImg = new Image();
+    await new Promise<void>((resolve) => {
+      processedImg.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(processedImg, 0, 0, canvas.width, canvas.height);
+        resolve();
+      };
+      processedImg.src = processedDataUrl;
+    });
 
     // 2. 캐릭터 오버레이 그리기 (실시간 미리보기와 동일한 위치/크기)
     const characterSize = Math.min(canvas.width, canvas.height) * 0.6; // 화면의 60% 크기
@@ -163,6 +192,8 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
 
     const updatedPhotos = [...capturedPhotos, newPhoto];
     setCapturedPhotos(updatedPhotos);
+
+    setIsProcessing(false);
 
     // 4장 다 촬영되면 콜백 실행
     if (updatedPhotos.length === 4) {
@@ -298,6 +329,16 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
                     <div className="text-6xl font-bold text-white drop-shadow-lg animate-pulse">{countdown}</div>
                   </div>
                 )}
+
+                {/* 배경 처리 중 */}
+                {isProcessing && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg p-4 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+                      <p className="text-sm text-gray-700">배경 처리 중...</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* 숨겨진 캔버스 (촬영용) */}
@@ -308,21 +349,27 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
             <div className="mt-6 text-center">
               <button
                 onClick={startCountdown}
-                disabled={isCapturing || capturedPhotos.length >= 4}
+                disabled={isCapturing || isProcessing || capturedPhotos.length >= 4}
                 className={`
                   w-20 h-20 rounded-full border-4 transition-all duration-200
                   ${
-                    isCapturing || capturedPhotos.length >= 4
+                    isCapturing || isProcessing || capturedPhotos.length >= 4
                       ? "border-gray-500 bg-gray-700 cursor-not-allowed"
                       : "border-white bg-red-500 hover:bg-red-600 hover:scale-110"
                   }
                 `}
               >
-                {isCapturing ? "⏱️" : "📸"}
+                {isCapturing ? "⏱️" : isProcessing ? "⚙️" : "📸"}
               </button>
 
               <p className="mt-2 text-gray-300">
-                {isCapturing ? "촬영 준비 중..." : capturedPhotos.length >= 4 ? "촬영 완료!" : "클릭해서 촬영"}
+                {isCapturing
+                  ? "촬영 준비 중..."
+                  : isProcessing
+                  ? "배경 처리 중..."
+                  : capturedPhotos.length >= 4
+                  ? "촬영 완료!"
+                  : "클릭해서 촬영"}
               </p>
             </div>
           </div>
