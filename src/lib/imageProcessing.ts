@@ -147,7 +147,7 @@ export const addCharacterOverlay = async (
   });
 };
 
-// 4컷 레이아웃 생성 (2x2 형태)
+// 4컷 레이아웃 생성 (9:16 모바일 전체 화면 비율)
 export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -155,19 +155,24 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
         throw new Error("4장의 사진이 필요합니다");
       }
 
-      // 캔버스 설정 (2x2 형태)
+      // 캔버스 설정 (9:16 모바일 비율)
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       if (!ctx) throw new Error("Canvas context not available");
 
-      // 캔버스 크기 설정 (2x2 형태)
-      const photoWidth = 300;
-      const photoHeight = 225; // 4:3 비율
-      const frameThickness = 20;
-      const photoSpacing = 8;
+      // 캔버스 크기 설정 (9:16 비율, 큰 사이즈)
+      canvas.width = 1080; // 9 비율
+      canvas.height = 1920; // 16 비율
 
-      canvas.width = photoWidth * 2 + photoSpacing + frameThickness * 2;
-      canvas.height = photoHeight * 2 + photoSpacing + frameThickness * 2;
+      const frameThickness = 40;
+      const photoSpacing = 20;
+
+      // 2x2 그리드로 사진 크기 계산
+      const availableWidth = canvas.width - frameThickness * 2 - photoSpacing;
+      const availableHeight = canvas.height - frameThickness * 2 - photoSpacing - 120; // 상단 타이틀 공간
+
+      const photoWidth = availableWidth / 2;
+      const photoHeight = (availableHeight - 80) / 2; // 하단 브랜딩 공간
 
       // 그라데이션 프레임 배경
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -187,6 +192,16 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
         canvas.height - frameThickness * 2
       );
 
+      // 상단 타이틀 영역
+      ctx.fillStyle = "#BA68C8";
+      ctx.font = "bold 48px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("🎭 AniShot", canvas.width / 2, frameThickness + 80);
+
+      ctx.fillStyle = "#666666";
+      ctx.font = "32px Arial";
+      ctx.fillText("나만의 인생네컷", canvas.width / 2, frameThickness + 130);
+
       // 2x2 그리드로 사진 배치
       const positions = [
         { row: 0, col: 0 }, // 좌상단
@@ -195,12 +210,14 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
         { row: 1, col: 1 }, // 우하단
       ];
 
+      const startY = frameThickness + 160; // 타이틀 아래부터 시작
+
       for (let i = 0; i < 4; i++) {
         const photo = photos[i];
         const pos = positions[i];
 
         const photoX = frameThickness + pos.col * (photoWidth + photoSpacing);
-        const photoY = frameThickness + pos.row * (photoHeight + photoSpacing);
+        const photoY = startY + pos.row * (photoHeight + photoSpacing);
 
         // 사진 그리기
         await new Promise<void>((resolveImg) => {
@@ -233,16 +250,21 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
             // 사진 그리기 (클리핑 없이 전체 표시)
             ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
-            // 사진 번호 표시 (작은 원형 배지)
+            // 사진 테두리
+            ctx.strokeStyle = "#E0E0E0";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(photoX, photoY, photoWidth, photoHeight);
+
+            // 사진 번호 표시 (큰 원형 배지)
             ctx.fillStyle = "#BA68C8";
             ctx.beginPath();
-            ctx.arc(photoX + 15, photoY + 15, 12, 0, Math.PI * 2);
+            ctx.arc(photoX + 25, photoY + 25, 20, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.fillStyle = "#FFFFFF";
-            ctx.font = "bold 14px Arial";
+            ctx.font = "bold 24px Arial";
             ctx.textAlign = "center";
-            ctx.fillText(`${i + 1}`, photoX + 15, photoY + 20);
+            ctx.fillText(`${i + 1}`, photoX + 25, photoY + 35);
 
             resolveImg();
           };
@@ -256,9 +278,21 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
         });
       }
 
+      // 하단 브랜딩 영역
+      const bottomY = startY + photoHeight * 2 + photoSpacing + 40;
+
+      ctx.fillStyle = "#BA68C8";
+      ctx.font = "28px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(`${new Date().toLocaleDateString("ko-KR")} 촬영`, canvas.width / 2, bottomY);
+
+      ctx.fillStyle = "#666666";
+      ctx.font = "24px Arial";
+      ctx.fillText("추억이 담긴 특별한 순간 ✨", canvas.width / 2, bottomY + 40);
+
       // 프레임 장식 효과
       ctx.strokeStyle = "#FFFFFF";
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 4;
       ctx.globalAlpha = 0.7;
       ctx.strokeRect(
         frameThickness / 2,
@@ -268,7 +302,7 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
       );
       ctx.globalAlpha = 1;
 
-      // 모서리 장식 (작은 하트)
+      // 모서리 장식 (큰 하트)
       const drawHeart = (x: number, y: number, size: number) => {
         ctx.fillStyle = "#FFE0F7";
         ctx.globalAlpha = 0.8;
@@ -289,20 +323,12 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
         ctx.globalAlpha = 1;
       };
 
-      // 네 모서리에 하트 장식
-      const heartSize = 12;
-      drawHeart(5, 5, heartSize); // 좌상단
-      drawHeart(canvas.width - heartSize - 5, 5, heartSize); // 우상단
-      drawHeart(5, canvas.height - heartSize - 5, heartSize); // 좌하단
-      drawHeart(canvas.width - heartSize - 5, canvas.height - heartSize - 5, heartSize); // 우하단
-
-      // 중앙에 작은 로고/브랜딩
-      ctx.fillStyle = "#BA68C8";
-      ctx.font = "bold 12px Arial";
-      ctx.textAlign = "center";
-      ctx.globalAlpha = 0.6;
-      ctx.fillText("AniShot", canvas.width / 2, canvas.height / 2 + 4);
-      ctx.globalAlpha = 1;
+      // 네 모서리에 하트 장식 (큰 사이즈)
+      const heartSize = 24;
+      drawHeart(10, 10, heartSize); // 좌상단
+      drawHeart(canvas.width - heartSize - 10, 10, heartSize); // 우상단
+      drawHeart(10, canvas.height - heartSize - 10, heartSize); // 좌하단
+      drawHeart(canvas.width - heartSize - 10, canvas.height - heartSize - 10, heartSize); // 우하단
 
       resolve(canvas.toDataURL("image/png"));
     } catch (error) {
