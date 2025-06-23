@@ -8,9 +8,10 @@ interface CameraProps {
   selectedCharacter: Character;
   onPhotosCapture: (photos: CapturedPhoto[]) => void;
   onBack: () => void;
+  removeBg: boolean;
 }
 
-export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: CameraProps) {
+export default function Camera({ selectedCharacter, onPhotosCapture, onBack, removeBg }: CameraProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -154,15 +155,16 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack }: C
     // 1. 비디오 프레임을 캔버스에 그리기
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // 1.5. 배경을 흰색으로 제거
+    // 1.5. 배경을 흰색으로 제거 (옵션)
     const originalDataUrl = canvas.toDataURL("image/png");
-    let processedDataUrl;
-
-    try {
-      processedDataUrl = await removeBackground(originalDataUrl);
-    } catch (error) {
-      console.warn("배경 제거 실패, 원본 사용:", error);
-      processedDataUrl = originalDataUrl;
+    let processedDataUrl = originalDataUrl;
+    if (removeBg) {
+      try {
+        processedDataUrl = await removeBackground(originalDataUrl);
+      } catch (error) {
+        console.warn("배경 제거 실패, 원본 사용:", error);
+        processedDataUrl = originalDataUrl;
+      }
     }
 
     // 처리된 이미지를 다시 캔버스에 그리기

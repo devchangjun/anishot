@@ -15,6 +15,7 @@ export default function HomePage() {
   const [capturedPhotos, setCapturedPhotos] = useState<CapturedPhoto[]>([]);
   const [finalImageDataUrl, setFinalImageDataUrl] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [removeBg, setRemoveBg] = useState<boolean>(false);
 
   const handleStartClick = () => {
     if (selectedCharacter) {
@@ -176,6 +177,26 @@ export default function HomePage() {
               ))}
             </div>
           </div>
+          <div className="max-w-xl mx-auto mb-8 flex flex-col items-center gap-2">
+            <label className="flex items-center gap-2 text-gray-700 text-base">
+              <input
+                type="checkbox"
+                checked={removeBg}
+                onChange={(e) => setRemoveBg(e.target.checked)}
+                className="w-5 h-5 accent-purple-600"
+              />
+              <span>촬영 시 배경을 흰색으로 지우기 (사람만 남기기)</span>
+            </label>
+            {removeBg && (
+              <div className="text-sm text-red-500 bg-red-50 rounded px-3 py-2 mt-1">
+                ⚠️ 배경 제거는 2~10초 정도 시간이 걸릴 수 있습니다.
+                <br />
+                완벽하게 인식되지 않을 수 있습니다.
+                <br />
+                (얼굴/사람이 잘 보이도록 촬영해 주세요)
+              </div>
+            )}
+          </div>
           <div className="text-center">
             <button
               onClick={() => selectedCharacter && setCurrentStep("camera")}
@@ -210,7 +231,12 @@ export default function HomePage() {
   // 카메라 단계
   if (currentStep === "camera" && selectedCharacter) {
     return (
-      <Camera selectedCharacter={selectedCharacter} onPhotosCapture={handlePhotosCapture} onBack={handleBackToHome} />
+      <Camera
+        selectedCharacter={selectedCharacter}
+        onPhotosCapture={handlePhotosCapture}
+        onBack={handleBackToHome}
+        removeBg={removeBg}
+      />
     );
   }
 
