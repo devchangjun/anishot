@@ -52,10 +52,10 @@ export const SAMPLE_ANIMATIONS: Animation[] = [
         name: "탄지로",
         thumbnailUrl: "/characters/탄지로메인.png",
         overlayImages: [
-          "/characters/탄지로.png",
-          "/characters/탄지로.png",
-          "/characters/탄지로.png",
-          "/characters/탄지로.png",
+          "/characters/탄지로1.png",
+          "/characters/탄지로1.png",
+          "/characters/탄지로1.png",
+          "/characters/탄지로1.png",
         ],
       },
       {
