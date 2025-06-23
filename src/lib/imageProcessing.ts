@@ -63,7 +63,7 @@ export const addCharacterOverlay = async (
   photoDataUrl: string,
   characterOverlayUrl: string,
   overlayPosition = { x: 0.7, y: 0.7 }, // 우하단
-  overlaySize = 0.5 // 이미지 크기의 30%
+  overlaySize = 1 // 이미지 크기의 30%
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement("canvas");
