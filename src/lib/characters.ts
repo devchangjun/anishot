@@ -98,6 +98,12 @@ export const SAMPLE_ANIMATIONS: Animation[] = [
           "/characters/levi3.png",
         ],
       },
+      {
+        id: "jean ",
+        name: "장 키르슈타인",
+        thumbnailUrl: "/characters/장메인.png",
+        overlayImages: ["/characters/장1.png", "/characters/장2.png", "/characters/장3.png", "/characters/장4.png"],
+      },
     ],
   },
   {
