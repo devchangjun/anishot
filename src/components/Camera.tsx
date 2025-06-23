@@ -209,7 +209,6 @@ export default function Camera({ selectedCharacter, onPhotosCapture, onBack, rem
       id: capturedPhotos.length + 1,
       dataUrl,
       timestamp: Date.now(),
-      characterOverlayUrl: overlayImageUrl,
     };
 
     const updatedPhotos = [...capturedPhotos, newPhoto];
