@@ -1,4 +1,5 @@
 import * as bodyPix from "@tensorflow-models/body-pix";
+import "@tensorflow/tfjs";
 import { CapturedPhoto } from "@/types";
 
 // BodyPix 모델 (전역으로 한 번만 로드)
@@ -24,65 +25,38 @@ export const loadBodyPixModel = async () => {
   }
 };
 
-// 배경 제거 (흰색 배경으로 교체)
-export const removeBackground = async (imageDataUrl: string): Promise<string> => {
-  try {
-    const model = await loadBodyPixModel();
+// BodyPix를 사용한 배경 제거 (사람만 남기고 배경을 흰색으로)
+// 설치 필요: npm install @tensorflow/tfjs @tensorflow-models/body-pix
+export async function removeBackground(dataUrl: string): Promise<string> {
+  const img = new window.Image();
+  img.src = dataUrl;
+  await new Promise((resolve) => (img.onload = resolve));
 
-    // 이미지 엘리먼트 생성
-    const img = new Image();
-    img.crossOrigin = "anonymous";
+  const net = await bodyPix.load();
+  const segmentation = await net.segmentPerson(img);
 
-    return new Promise((resolve, reject) => {
-      img.onload = async () => {
-        try {
-          // 캔버스 생성
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          if (!ctx) throw new Error("Canvas context not available");
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, 0, 0);
 
-          canvas.width = img.width;
-          canvas.height = img.height;
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const { data } = imageData;
 
-          // 원본 이미지를 캔버스에 그리기
-          ctx.drawImage(img, 0, 0);
-
-          // 세그멘테이션 수행
-          const segmentation = await model.segmentPerson(canvas, {
-            flipHorizontal: false,
-            internalResolution: "medium",
-            segmentationThreshold: 0.7,
-          });
-
-          // 배경을 흰색으로 교체
-          const backgroundColor = { r: 255, g: 255, b: 255, a: 255 };
-          const foregroundColor = { r: 0, g: 0, b: 0, a: 0 }; // 투명
-
-          const coloredPartImage = bodyPix.toMask(segmentation, foregroundColor, backgroundColor);
-
-          // 마스크를 적용하여 최종 이미지 생성
-          const opacity = 1;
-          const maskBlurAmount = 0;
-          const flipHorizontal = false;
-
-          bodyPix.drawMask(canvas, canvas, coloredPartImage, opacity, maskBlurAmount, flipHorizontal);
-
-          // 결과를 Data URL로 변환
-          resolve(canvas.toDataURL("image/png"));
-        } catch (error) {
-          reject(error);
-        }
-      };
-
-      img.onerror = reject;
-      img.src = imageDataUrl;
-    });
-  } catch (error) {
-    console.error("배경 제거 실패:", error);
-    // 실패 시 원본 이미지 반환
-    return imageDataUrl;
+  for (let i = 0; i < data.length; i += 4) {
+    const n = i / 4;
+    if (segmentation.data[n] === 0) {
+      // 배경: 흰색으로
+      data[i] = 255;
+      data[i + 1] = 255;
+      data[i + 2] = 255;
+      data[i + 3] = 255;
+    }
   }
-};
+  ctx.putImageData(imageData, 0, 0);
+  return canvas.toDataURL();
+}
 
 // 캐릭터 오버레이 합성
 export const addCharacterOverlay = async (
