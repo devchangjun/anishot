@@ -193,7 +193,16 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
         const photoX = frameThickness + pos.col * (photoWidth + photoSpacing);
         const photoY = startY + pos.row * (photoHeight + photoSpacing);
 
-        // 사진 그리기
+        // 1. 캐릭터 오버레이 합성 (비동기)
+        const characterOverlayUrl = photo.characterOverlayUrl; // 각 사진별로 다르게!
+        const overlayedDataUrl = await addCharacterOverlay(
+          photo.dataUrl,
+          characterOverlayUrl,
+          { x: 0.7, y: 0.7 },
+          2.5 // 캐릭터를 더 크게!
+        );
+
+        // 2. 기존처럼 이미지 그리기
         await new Promise<void>((resolveImg) => {
           const img = new Image();
           img.onload = () => {
@@ -248,7 +257,7 @@ export const create4CutLayout = async (photos: CapturedPhoto[]): Promise<string>
             resolveImg();
           };
 
-          img.src = photo.dataUrl;
+          img.src = overlayedDataUrl;
         });
       }
 

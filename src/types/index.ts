@@ -11,6 +11,7 @@ export type CapturedPhoto = {
   id: number;
   dataUrl: string;
   timestamp: number;
+  characterOverlayUrl: string; // 사용자가 선택한 캐릭터 오버레이 이미지 경로
 };
 
 // 4컷 레이아웃 정보
