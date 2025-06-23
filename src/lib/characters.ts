@@ -50,12 +50,12 @@ export const SAMPLE_ANIMATIONS: Animation[] = [
       {
         id: "tanjiro",
         name: "탄지로",
-        thumbnailUrl: "/characters/levi2.png",
+        thumbnailUrl: "/characters/탄지로메인.png",
         overlayImages: [
-          "/characters/levi2.png",
-          "/characters/levi2.png",
-          "/characters/levi2.png",
-          "/characters/levi2.png",
+          "/characters/탄지로.png",
+          "/characters/탄지로.png",
+          "/characters/탄지로.png",
+          "/characters/탄지로.png",
         ],
       },
       {
@@ -80,7 +80,12 @@ export const SAMPLE_ANIMATIONS: Animation[] = [
         id: "levi",
         name: "리바이",
         thumbnailUrl: "/characters/levi.png",
-        overlayImages: ["/characters/levi.png", "/characters/levi.png", "/characters/levi.png", "/characters/levi.png"],
+        overlayImages: [
+          "/characters/levi.png",
+          "/characters/levi2.png",
+          "/characters/levi3.png",
+          "/characters/levi.png",
+        ],
       },
       {
         id: "eren",
