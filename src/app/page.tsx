@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SAMPLE_CHARACTERS } from "@/lib/characters";
-import { Character, CapturedPhoto } from "@/types";
+import { SAMPLE_ANIMATIONS, SAMPLE_CHARACTERS } from "@/lib/characters";
+import { Animation, Character, CapturedPhoto } from "@/types";
 import { create4CutLayout } from "@/lib/imageProcessing";
 import Camera from "@/components/Camera";
 import Preview from "@/components/Preview";
+import Image from "next/image";
 
 export default function HomePage() {
+  const [selectedAnimation, setSelectedAnimation] = useState<Animation | null>(null);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
-  const [currentStep, setCurrentStep] = useState<"home" | "camera" | "preview">("home");
+  const [currentStep, setCurrentStep] = useState<"animation" | "character" | "camera" | "preview">("animation");
   const [capturedPhotos, setCapturedPhotos] = useState<CapturedPhoto[]>([]);
   const [finalImageDataUrl, setFinalImageDataUrl] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -26,7 +28,7 @@ export default function HomePage() {
   };
 
   const handleBackToHome = () => {
-    setCurrentStep("home");
+    setCurrentStep("animation");
     setSelectedCharacter(null);
     setCapturedPhotos([]);
     setFinalImageDataUrl("");
@@ -67,6 +69,143 @@ export default function HomePage() {
 
     generate4Cut();
   }, [currentStep, capturedPhotos, finalImageDataUrl]);
+
+  // Step1: 애니메이션 선택
+  if (currentStep === "animation") {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-4">🎭 AniShot</h1>
+            <p className="text-lg md:text-xl text-gray-600 mb-8">좋아하는 애니메이션을 먼저 선택하세요</p>
+          </div>
+          <div className="max-w-4xl mx-auto mb-12">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">애니메이션 선택</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {SAMPLE_ANIMATIONS.map((ani) => (
+                <div
+                  key={ani.id}
+                  onClick={() => {
+                    setSelectedAnimation(ani);
+                    setCurrentStep("character");
+                  }}
+                  className={`
+                    relative cursor-pointer rounded-2xl overflow-hidden transition-all duration-300
+                    ${
+                      selectedAnimation?.id === ani.id
+                        ? "ring-4 ring-purple-500 scale-105 shadow-xl"
+                        : "hover:scale-105 hover:shadow-lg"
+                    }
+                  `}
+                >
+                  <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <Image
+                      src={ani.thumbnailUrl}
+                      alt={ani.name}
+                      className="w-64 h-64 object-contain"
+                      width={96}
+                      height={96}
+                      unoptimized
+                    />
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                    <h3 className="text-white font-semibold text-lg">{ani.name}</h3>
+                  </div>
+                  {selectedAnimation?.id === ani.id && (
+                    <div className="absolute top-3 right-3">
+                      <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm">✓</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Step2: 캐릭터 선택
+  if (currentStep === "character" && selectedAnimation) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-4">🎭 AniShot</h1>
+            <p className="text-lg md:text-xl text-gray-600 mb-8">{selectedAnimation.name}의 캐릭터를 선택하세요</p>
+          </div>
+          <div className="max-w-4xl mx-auto mb-12">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">캐릭터 선택</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {selectedAnimation.characters.map((character) => (
+                <div
+                  key={character.id}
+                  onClick={() => setSelectedCharacter(character)}
+                  className={`
+                    relative cursor-pointer rounded-2xl overflow-hidden transition-all duration-300
+                    ${
+                      selectedCharacter?.id === character.id
+                        ? "ring-4 ring-purple-500 scale-105 shadow-xl"
+                        : "hover:scale-105 hover:shadow-lg"
+                    }
+                  `}
+                >
+                  <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                    <Image
+                      src={character.thumbnailUrl}
+                      alt={character.name}
+                      className="w-64 h-64 object-contain"
+                      width={96}
+                      height={96}
+                      unoptimized
+                    />
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                    <h3 className="text-white font-semibold text-lg">{character.name}</h3>
+                  </div>
+                  {selectedCharacter?.id === character.id && (
+                    <div className="absolute top-3 right-3">
+                      <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm">✓</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={() => selectedCharacter && setCurrentStep("camera")}
+              disabled={!selectedCharacter}
+              className={`
+                px-8 py-4 text-xl font-semibold rounded-full transition-all duration-300
+                ${
+                  selectedCharacter
+                    ? "bg-purple-600 text-white hover:bg-purple-700 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }
+              `}
+            >
+              {selectedCharacter ? "📸 촬영하러 가기" : "캐릭터를 선택해주세요"}
+            </button>
+            <button
+              onClick={() => {
+                setSelectedAnimation(null);
+                setSelectedCharacter(null);
+                setCurrentStep("animation");
+              }}
+              className="ml-4 px-6 py-3 text-base rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all"
+            >
+              이전으로
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   // 카메라 단계
   if (currentStep === "camera" && selectedCharacter) {
@@ -114,7 +253,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto mb-12">
           <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">함께할 캐릭터를 선택하세요</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             {SAMPLE_CHARACTERS.map((character) => (
               <div
                 key={character.id}
@@ -130,7 +269,14 @@ export default function HomePage() {
               >
                 <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                   {/* 실제 캐릭터 이미지 */}
-                  <img src={character.thumbnailUrl} alt={character.name} className="w-24 h-24 object-contain" />
+                  <Image
+                    src={character.thumbnailUrl}
+                    alt={character.name}
+                    className="w-64 h-64 object-contain"
+                    width={96}
+                    height={96}
+                    unoptimized
+                  />
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">

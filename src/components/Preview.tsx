@@ -1,6 +1,7 @@
 "use client";
 
 import { Character } from "@/types";
+import Image from "next/image";
 
 interface PreviewProps {
   finalImageDataUrl: string;
@@ -31,11 +32,14 @@ export default function Preview({ finalImageDataUrl, selectedCharacter, onReset,
         <div className="flex flex-col items-center">
           {/* 9:16 비율로 표시되는 이미지 */}
           <div className="relative bg-white rounded-2xl shadow-2xl p-4 max-w-md w-full">
-            <img
+            <Image
               src={finalImageDataUrl}
               alt="완성된 4컷 사진"
               className="w-full h-auto rounded-lg shadow-lg"
               style={{ aspectRatio: "9/16" }}
+              width={1080}
+              height={1920}
+              unoptimized
             />
 
             {/* 이미지 위 장식 */}

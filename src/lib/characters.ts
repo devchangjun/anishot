@@ -31,3 +31,174 @@ export const SAMPLE_CHARACTERS: Character[] = [
     ],
   },
 ];
+
+// 애니메이션 타입
+export interface Animation {
+  id: string;
+  name: string;
+  thumbnailUrl: string;
+  characters: Character[];
+}
+
+// 샘플 애니메이션 데이터
+export const SAMPLE_ANIMATIONS: Animation[] = [
+  {
+    id: "demon_slayer",
+    name: "귀멸의 칼날",
+    thumbnailUrl: "/characters/levi.png",
+    characters: [
+      {
+        id: "tanjiro",
+        name: "탄지로",
+        thumbnailUrl: "/characters/levi2.png",
+        overlayImages: [],
+      },
+      {
+        id: "nezuko",
+        name: "네즈코",
+        thumbnailUrl: "/characters/levi3.png",
+        overlayImages: [],
+      },
+    ],
+  },
+  {
+    id: "attack_on_titan",
+    name: "진격의 거인",
+    thumbnailUrl: "/characters/levi2.png",
+    characters: [
+      {
+        id: "levi",
+        name: "리바이",
+        thumbnailUrl: "/characters/levi.png",
+        overlayImages: [],
+      },
+      {
+        id: "eren",
+        name: "에렌",
+        thumbnailUrl: "/characters/levi3.png",
+        overlayImages: [],
+      },
+    ],
+  },
+  {
+    id: "one_piece",
+    name: "원피스",
+    thumbnailUrl: "/characters/cat-overlay.svg",
+    characters: [
+      {
+        id: "luffy",
+        name: "루피",
+        thumbnailUrl: "/characters/cat-overlay.svg",
+        overlayImages: [],
+      },
+      {
+        id: "zoro",
+        name: "조로",
+        thumbnailUrl: "/characters/dog-overlay.svg",
+        overlayImages: [],
+      },
+    ],
+  },
+  {
+    id: "naruto",
+    name: "나루토",
+    thumbnailUrl: "/characters/rabbit-overlay.svg",
+    characters: [
+      {
+        id: "naruto",
+        name: "나루토",
+        thumbnailUrl: "/characters/rabbit-overlay.svg",
+        overlayImages: [],
+      },
+      {
+        id: "sasuke",
+        name: "사스케",
+        thumbnailUrl: "/characters/levi2.png",
+        overlayImages: [],
+      },
+    ],
+  },
+  {
+    id: "spy_x_family",
+    name: "스파이 패밀리",
+    thumbnailUrl: "/characters/levi3.png",
+    characters: [
+      {
+        id: "anya",
+        name: "아냐",
+        thumbnailUrl: "/characters/levi3.png",
+        overlayImages: [],
+      },
+      {
+        id: "loid",
+        name: "로이드",
+        thumbnailUrl: "/characters/levi.png",
+        overlayImages: [],
+      },
+    ],
+  },
+  {
+    id: "pokemon",
+    name: "포켓몬스터",
+    thumbnailUrl: "/characters/dog-overlay.svg",
+    characters: [
+      {
+        id: "pikachu",
+        name: "피카츄",
+        thumbnailUrl: "/characters/dog-overlay.svg",
+        overlayImages: [],
+      },
+      {
+        id: "eevee",
+        name: "이브이",
+        thumbnailUrl: "/characters/cat-overlay.svg",
+        overlayImages: [],
+      },
+    ],
+  },
+  {
+    id: "dragon_ball",
+    name: "드래곤볼",
+    thumbnailUrl: "/characters/levi2.png",
+    characters: [
+      {
+        id: "goku",
+        name: "손오공",
+        thumbnailUrl: "/characters/levi2.png",
+        overlayImages: [],
+      },
+      {
+        id: "vegeta",
+        name: "베지터",
+        thumbnailUrl: "/characters/levi3.png",
+        overlayImages: [],
+      },
+    ],
+  },
+  {
+    id: "sailor_moon",
+    name: "세일러문",
+    thumbnailUrl: "/characters/cat-overlay.svg",
+    characters: [
+      {
+        id: "usagi",
+        name: "우사기",
+        thumbnailUrl: "/characters/cat-overlay.svg",
+        overlayImages: [],
+      },
+    ],
+  },
+  {
+    id: "slamdunk",
+    name: "슬램덩크",
+    thumbnailUrl: "/characters/rabbit-overlay.svg",
+    characters: [
+      {
+        id: "sakuragi",
+        name: "사쿠라기",
+        thumbnailUrl: "/characters/rabbit-overlay.svg",
+        overlayImages: [],
+      },
+    ],
+  },
+];

@@ -1,10 +1,10 @@
 // 캐릭터 정보
-export type Character = {
+export interface Character {
   id: string;
   name: string;
   thumbnailUrl: string;
   overlayImages: string[]; // 컷당 오버레이 PNG
-};
+}
 
 // 촬영된 사진 정보
 export type CapturedPhoto = {
@@ -32,3 +32,10 @@ export type AppState = {
   currentStep: "home" | "character-select" | "camera" | "preview";
   isProcessing: boolean;
 };
+
+export interface Animation {
+  id: string;
+  name: string;
+  thumbnailUrl: string;
+  characters: Character[];
+}

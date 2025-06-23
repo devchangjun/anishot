@@ -1,0 +1,20 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# 프로젝트 개발 가이드
+
+## 스타일링
+
+- tailwind css v4
+
+## Nextjs 개발 가이드
+
+- 이미지를 사용할 땐 <Image/> 태그로 최적화 한다.
+
+## 폴더 구조
+
+- src
+- src/app: Next.js App Router
